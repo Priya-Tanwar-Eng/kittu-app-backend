@@ -6,7 +6,7 @@ const {
   resendOTP,
   getMe,
   updateProfile,
-} = require("../controllers/authController.js");
+} = require("../controllers/authController");
 const { protect } = require("../middleware/authMiddleware");
 
 // Public routes (login ke pehle)
