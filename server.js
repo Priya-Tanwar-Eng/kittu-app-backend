@@ -13,6 +13,7 @@ const orderRoutes   = require("./routes/orders");
 const app = express();
 
 // ─── 1. CORS — sabse pehle ────────────────────────────────────
+
 const corsOptions = {
   origin: process.env.FRONTEND_URL
     ? process.env.FRONTEND_URL.split(",")
