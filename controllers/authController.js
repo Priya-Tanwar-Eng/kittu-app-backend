@@ -1,29 +1,11 @@
 // backend/controllers/authController.js
 const ZaptoUser = require("../models/ZaptoUser");
 const jwt       = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",  // ✅ IPv4 force karo
-  port: 465,
-  secure: true,
-  family: 4,               // ✅ IPv4 only — Render free tier fix
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-  connectionTimeout: 8000,
-  greetingTimeout:   8000,
-  socketTimeout:     8000,
-});
-
-transporter.verify((error) => {
-  if (error) {
-    console.error("❌ Gmail connection failed:", error.message);
-  } else {
-    console.log("✅ Gmail service ready —", process.env.GMAIL_USER);
-  }
-});
+// ✅ Resend — simple, Render pe kaam karta hai
+const resend = new Resend(process.env.RESEND_API_KEY);
+console.log("✅ Resend ready");
 
 const generateOTP = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
@@ -35,8 +17,8 @@ const generateToken = (userId) =>
 
 const sendOTPEmail = async (email, otp, phone) => {
   try {
-    await transporter.sendMail({
-      from: `"Kittu App 🛒" <${process.env.GMAIL_USER}>`,
+    const { error } = await resend.emails.send({
+      from: "Kittu App <onboarding@resend.dev>",
       to: email,
       subject: "Your Kittu Login OTP",
       html: `
@@ -53,6 +35,10 @@ const sendOTPEmail = async (email, otp, phone) => {
         </div>
       `,
     });
+    if (error) {
+      console.error("❌ Email sending failed:", error.message);
+      return { success: false, error: error.message };
+    }
     console.log(`✅ OTP sent to ${email} for phone ${phone}`);
     return { success: true };
   } catch (error) {
